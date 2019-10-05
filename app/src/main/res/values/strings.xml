@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">LearningProgram</string>
+    <string name="all">Все</string>
+
+
+    <string-array name="сhose_wiew_week">
+        <item>Без группировки по неделям</item>
+        <item>С группировкой по неделям</item>
+    </string-array>
+</resources>
