@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     List<String> lectors;
     Spinner lectorsSpiner;
     Spinner choseViewSpinner;
+    LinearLayoutManager layoutManager;
     int positionStart = 1;
     private static Bundle mBundleRecyclerViewState;
 
@@ -50,16 +51,20 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if (mBundleRecyclerViewState != null) {
             positionStart = mBundleRecyclerViewState.getInt(SAVE_NUMBER_OF_LECTURE);
-            recyclerView.scrollToPosition(positionStart);
+            recyclerView.post(new Runnable() {
+                @Override
+                public void run() {
+                    recyclerView.scrollToPosition(positionStart);
+                }
+            });
             Log.d("onResume", "onResume: " + positionStart);
-
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        positionStart += 1;
+        positionStart = ((LinearLayoutManager) layoutManager).findFirstVisibleItemPosition() + 1;
         mBundleRecyclerViewState = new Bundle();
         mBundleRecyclerViewState.putInt(SAVE_NUMBER_OF_LECTURE, positionStart);
     }
