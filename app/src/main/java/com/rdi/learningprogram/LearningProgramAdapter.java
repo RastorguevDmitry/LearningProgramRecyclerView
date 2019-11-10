@@ -23,7 +23,7 @@ public class LearningProgramAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         public static final int Normal = 2;
     }
 
-    public void setmLectures(List<?> lectures) {
+    public void setLectures(List<?> lectures) {
         mAllLectures = lectures == null ? null : new ArrayList<>(lectures);
         if (lectures == null) {
             mLectures = null;
@@ -60,10 +60,10 @@ public class LearningProgramAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             ((WeekHolder) holder).mWeek.setText(mAllLectures.get(position).toString());
         } else if (holder instanceof LectureHolder) {
             Lecture lecture = (Lecture) mAllLectures.get(position);
-            ((LectureHolder) holder).mNumber.setText(lecture.getmNumber());
-            ((LectureHolder) holder).mData.setText(lecture.getmData());
-            ((LectureHolder) holder).mTheme.setText(lecture.getmTheme());
-            ((LectureHolder) holder).mLector.setText(lecture.getmLector());
+            ((LectureHolder) holder).mNumber.setText(String.valueOf(lecture.getNumber()));
+            ((LectureHolder) holder).mData.setText(lecture.getData());
+            ((LectureHolder) holder).mTheme.setText(lecture.getTheme());
+            ((LectureHolder) holder).mLector.setText(lecture.getLector());
         }
     }
 

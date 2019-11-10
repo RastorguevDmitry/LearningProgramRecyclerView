@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">LearningProgram</string>
     <string name="all">Все</string>
+    <string name="error_loading">не удалось загрузить</string>
 
 
     <string-array name="сhose_wiew_week">

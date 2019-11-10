@@ -1,7 +1,14 @@
 package com.rdi.learningprogram;
 
+import androidx.annotation.Nullable;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rdi.learningprogram.models.Lecture;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -9,28 +16,15 @@ import java.util.List;
 import java.util.Set;
 
 public class LearningProgramProvider {
+    private static final String LECTURES_URL = "http://landsovet.ru/learning_program.json";
 
-    public List<Lecture> mLecture = Arrays.asList(
-            new Lecture("1", "24.09.2019", "Вводное занятие", "Соколов"),
-            new Lecture("2", "26.09.2019", "View, Layouts", "Соколов"),
-            new Lecture("3", "28.09.2019", "Drawables", "Соколов"),
-            new Lecture("4", "01.10.2019", "Activity", "Сафарян"),
-            new Lecture("5", "03.10.2019", "Адаптеры", "Чумак"),
-            new Lecture("6", "05.10.2019", "UI: практика", "Кудрявцев"),
-            new Lecture("7", "08.10.2019", "Custom View", "Кудрявцев"),
-            new Lecture("8", "10.10.2019", "Touch events", "Бильчук"),
-            new Lecture("9", "12.10.2019", "Сложные жесты", "Соколов"),
-            new Lecture("10", "24.09.2019", "Вводное занятие", "Соколов"),
-            new Lecture("11", "26.09.2019", "View, Layouts", "Соколов"),
-            new Lecture("12", "28.09.2019", "Drawables", "Соколов"),
-            new Lecture("13", "01.10.2019", "Activity", "Сафарян"),
-            new Lecture("14", "03.10.2019", "Адаптеры", "Чумак"),
-            new Lecture("15", "05.10.2019", "UI: практика", "Кудрявцев"),
-            new Lecture("16", "08.10.2019", "Custom View", "Кудрявцев"),
-            new Lecture("17", "10.10.2019", "Touch events", "Бильчук"),
-            new Lecture("18", "12.10.2019", "Сложные жесты", "Соколов")
-    );
+    public List<Lecture> mLecture;
 
+
+    @Nullable
+    public List<Lecture> getLectures() {
+        return mLecture == null ? null : new ArrayList<>(mLecture);
+    }
 
     public List<Lecture> providerLectures() {
         return mLecture;
@@ -39,7 +33,7 @@ public class LearningProgramProvider {
     public List<String> providerLector() {
         Set<String> lectorsSet = new HashSet<>();
         for (Lecture lecture : mLecture) {
-            lectorsSet.add(lecture.getmLector());
+            lectorsSet.add(lecture.getLector());
         }
         return new ArrayList<>(lectorsSet);
     }
@@ -47,7 +41,7 @@ public class LearningProgramProvider {
     public List<Lecture> filterBy(String lectorName) {
         List<Lecture> result = new ArrayList<>();
         for (Lecture lecture : mLecture) {
-            if (lecture.getmLector().equals(lectorName)) {
+            if (lecture.getLector().equals(lectorName)) {
                 result.add(lecture);
             }
         }
@@ -60,7 +54,7 @@ public class LearningProgramProvider {
         int numberOfWeekAdded = 0;
         int currentNumberOfWeek;
         for (Object lecture : lectures) {
-            currentNumberOfWeek = (Integer.parseInt(((Lecture) lecture).getmNumber()) - 1) / 3 + 1;
+            currentNumberOfWeek = ((Lecture) lecture).getWeekIndex();
             if (currentNumberOfWeek != numberOfWeekAdded) {
                 mLectureWithWeek.add("Неделя " + currentNumberOfWeek);
                 mLectureWithWeek.add(lecture);
@@ -70,4 +64,35 @@ public class LearningProgramProvider {
         }
         return mLectureWithWeek;
     }
+
+    @Nullable
+    public List<Lecture> loadLecturesFromWeb() {
+        if (mLecture != null) {
+            return mLecture;
+        }
+        InputStream is = null;
+        try {
+            final URL url = new URL(LECTURES_URL);
+            URLConnection connection = url.openConnection();
+            is = connection.getInputStream();
+            ObjectMapper mapper = new ObjectMapper();
+            Lecture[] lectures = mapper.readValue(is, Lecture[].class);
+            mLecture = Arrays.asList(lectures);
+            return new ArrayList<>(mLecture);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
+    }
+
+
+
 }

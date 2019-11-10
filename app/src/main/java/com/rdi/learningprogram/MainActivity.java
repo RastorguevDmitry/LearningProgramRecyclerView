@@ -1,5 +1,6 @@
 package com.rdi.learningprogram;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -7,12 +8,16 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.rdi.learningprogram.models.Lecture;
+
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     List<?> lectures;
     List<String> lectors;
-    Spinner lectorsSpiner;
+    Spinner lectorsSpinner;
     Spinner choseViewSpinner;
     LinearLayoutManager layoutManager;
     int positionStart = 1;
@@ -35,14 +40,27 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mLearningProgramProvider = new LearningProgramProvider();
-        lectures = mLearningProgramProvider.providerLectures();
+
+        loadLearningProgram();
+    }
+
+    private void initViewAfterLoadFinish() {
         adapter = new LearningProgramAdapter();
         lectors = mLearningProgramProvider.providerLector();
         initRecyclerView();
-        filRecyclerView(mLearningProgramProvider.providerLectures());
+        filRecyclerView(mLearningProgramProvider.getLectures());
         initLectorsSpiner();
         initChoseViewSpinner();
+    }
+
+    private void loadLearningProgram() {
+        mLearningProgramProvider = new LearningProgramProvider();
+        lectures = mLearningProgramProvider.getLectures();
+        if (lectures == null) {
+            new LoadLecturesTask(this).execute();
+        } else {
+            initViewAfterLoadFinish();
+        }
     }
 
 
@@ -70,13 +88,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initLectorsSpiner() {
-        lectorsSpiner = findViewById(R.id.lectors_spinner);
+        lectorsSpinner = findViewById(R.id.lectors_spinner);
         Collections.sort(lectors);
         lectors.add(POSITION_ALL, getResources().getString(R.string.all));
 
-        lectorsSpiner.setAdapter(new LectorSpinerAdapter(lectors));
+        lectorsSpinner.setAdapter(new LectorSpinerAdapter(lectors));
 
-        lectorsSpiner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        lectorsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
                 workWithTwoSpinner(position, choseViewSpinner.getSelectedItemPosition());
@@ -97,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
         choseViewSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-                workWithTwoSpinner(lectorsSpiner.getSelectedItemPosition(), position);
+                workWithTwoSpinner(lectorsSpinner.getSelectedItemPosition(), position);
             }
 
             @Override
@@ -115,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void filRecyclerView(List<?> mLecture) {
-        adapter.setmLectures(mLecture);
+        adapter.setLectures(lectures);
         recyclerView.setAdapter(adapter);
     }
 
@@ -135,4 +153,43 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private class LoadLecturesTask extends AsyncTask<Void, Void, List<Lecture>> {
+        private final WeakReference<MainActivity> mActivityRef;
+        private final LearningProgramProvider mProvider;
+
+
+        private LoadLecturesTask(MainActivity mainActivity) {
+            mActivityRef = new WeakReference<>(mainActivity);
+            mProvider = mainActivity.mLearningProgramProvider;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            MainActivity mainActivity = mActivityRef.get();
+            if (mainActivity != null) {
+            //    mainActivity.mLoadingView.setVisibility(View.VISIBLE);
+            }
+        }
+
+        @Override
+        protected List<Lecture> doInBackground(Void... voids) {
+            return mProvider.loadLecturesFromWeb();
+        }
+
+        @Override
+        protected void onPostExecute(List<Lecture> lectures) {
+            MainActivity mainActivity = mActivityRef.get();
+            if (mainActivity == null) {
+                return;
+            }
+         //   mainActivity.mLoadingView.setVisibility(View.GONE);
+            if (lectures == null) {
+                Toast.makeText(mainActivity.getBaseContext(), R.string.error_loading, Toast.LENGTH_SHORT).show();
+            } else {
+                mainActivity.lectures = mProvider.getLectures();
+                mainActivity.initViewAfterLoadFinish();
+
+            }
+        }
+    }
 }
