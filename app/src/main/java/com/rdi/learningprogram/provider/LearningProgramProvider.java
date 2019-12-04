@@ -1,4 +1,4 @@
-package com.rdi.learningprogram;
+package com.rdi.learningprogram.provider;
 
 import androidx.annotation.Nullable;
 

@@ -15,7 +15,10 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.rdi.learningprogram.adapters.LearningProgramAdapter;
+import com.rdi.learningprogram.adapters.LectorSpinerAdapter;
 import com.rdi.learningprogram.models.Lecture;
+import com.rdi.learningprogram.provider.LearningProgramProvider;
 
 import java.lang.ref.WeakReference;
 import java.util.Collections;

@@ -1,4 +1,4 @@
-package com.rdi.learningprogram;
+package com.rdi.learningprogram.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.rdi.learningprogram.R;
 import com.rdi.learningprogram.models.Lecture;
 
 import java.util.ArrayList;
