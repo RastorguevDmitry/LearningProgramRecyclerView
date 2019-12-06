@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.rdi.learningprogram.R;
@@ -17,7 +18,9 @@ import java.util.List;
 public class LearningProgramAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<Lecture> mLectures;
-    private List<?> mAllLectures;
+    private List<Object> mAllLectures;
+
+    private OnLectureClickListener mClickListener;
 
     private class VIEW_TYPES {
         public static final int Header = 1;
@@ -61,10 +64,8 @@ public class LearningProgramAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             ((WeekHolder) holder).mWeek.setText(mAllLectures.get(position).toString());
         } else if (holder instanceof LectureHolder) {
             Lecture lecture = (Lecture) mAllLectures.get(position);
-            ((LectureHolder) holder).mNumber.setText(String.valueOf(lecture.getNumber()));
-            ((LectureHolder) holder).mData.setText(lecture.getData());
-            ((LectureHolder) holder).mTheme.setText(lecture.getTheme());
-            ((LectureHolder) holder).mLector.setText(lecture.getLector());
+            ((LectureHolder) holder).bindView((Lecture) lecture);
+
         }
     }
 
@@ -89,7 +90,7 @@ public class LearningProgramAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
 
 
-    static class LectureHolder extends RecyclerView.ViewHolder {
+    private class LectureHolder extends RecyclerView.ViewHolder {
         private final TextView mNumber;
         private final TextView mData;
         private final TextView mTheme;
@@ -101,6 +102,19 @@ public class LearningProgramAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             mData = itemView.findViewById(R.id.date);
             mTheme = itemView.findViewById(R.id.theme);
             mLector = itemView.findViewById(R.id.lectore);
+
+        }
+
+        private void bindView(Lecture lecture) {
+            mNumber.setText(String.valueOf(lecture.getNumber()));
+            mData.setText(lecture.getData());
+            mTheme.setText(lecture.getTheme());
+            mLector.setText(lecture.getLector());
+            itemView.setOnClickListener(v -> {
+                if (mClickListener != null) {
+                    mClickListener.onItemClick(lecture);
+                }
+            });
         }
     }
 
@@ -111,5 +125,12 @@ public class LearningProgramAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             super(itemView);
             mWeek = itemView.findViewById(R.id.week);
         }
+    }
+
+    /**
+     * Устанавливает обработчик нажатия на элементы списка
+     */
+    public void setClickListener(@Nullable OnLectureClickListener clickListener) {
+        mClickListener = clickListener;
     }
 }
